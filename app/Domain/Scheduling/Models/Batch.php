@@ -6,6 +6,7 @@ namespace App\Domain\Scheduling\Models;
 
 use App\Domain\Catalog\Enums\DeliveryMode;
 use App\Domain\Catalog\Models\Course;
+use App\Domain\Enrollment\Models\Enrollment;
 use App\Domain\Identity\Models\Branch;
 use App\Domain\Scheduling\Enums\BatchStatus;
 use App\Support\Concerns\HasUlid;
@@ -177,5 +178,34 @@ class Batch extends Model
         }
 
         return true;
+    }
+
+    /**
+     * @return HasMany<Enrollment, $this>
+     */
+    public function enrollments(): HasMany
+    {
+        return $this->hasMany(Enrollment::class);
+    }
+
+    /**
+     * Get or create auto default batch for self-paced courses.
+     */
+    public static function getDefaultBatchForCourse(Course $course): self
+    {
+        return self::firstOrCreate(
+            [
+                'course_id' => $course->id,
+                'name' => 'Self-Paced Rolling Cohort',
+            ],
+            [
+                'branch_id' => $course->branch_id,
+                'delivery_mode' => $course->default_delivery_mode,
+                'start_date' => now()->toDateString(),
+                'end_date' => now()->addYears(2)->toDateString(),
+                'capacity' => 10000,
+                'status' => BatchStatus::Open,
+            ]
+        );
     }
 }

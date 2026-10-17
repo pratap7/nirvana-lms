@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Identity\Models;
 
+use App\Domain\Enrollment\Models\Enrollment;
 use App\Domain\Identity\Enums\Gender;
 use App\Domain\Identity\Enums\UserStatus;
 use App\Support\Concerns\HasUlid;
@@ -252,6 +253,14 @@ class User extends Authenticatable implements FilamentUser, HasName, MustVerifyE
     public function scopeForBranch($query, int $branchId)
     {
         return $query->where('primary_branch_id', $branchId);
+    }
+
+    /**
+     * @return HasMany<Enrollment, $this>
+     */
+    public function enrollments(): HasMany
+    {
+        return $this->hasMany(Enrollment::class, 'student_id');
     }
 
     // ──────────────────────────────────────────────
