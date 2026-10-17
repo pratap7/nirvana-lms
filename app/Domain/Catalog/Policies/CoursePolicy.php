@@ -6,6 +6,7 @@ namespace App\Domain\Catalog\Policies;
 
 use App\Domain\Catalog\Models\Course;
 use App\Domain\Identity\Models\User;
+use App\Domain\Identity\Services\PermissionResolver;
 
 class CoursePolicy
 {
@@ -20,7 +21,11 @@ class CoursePolicy
             return true;
         }
 
-        return $user->can('course.view');
+        if ($course->created_by === $user->id) {
+            return true;
+        }
+
+        return app(PermissionResolver::class)->can($user, 'course.view', $course);
     }
 
     public function create(User $user): bool
@@ -30,12 +35,28 @@ class CoursePolicy
 
     public function update(User $user, Course $course): bool
     {
-        return $user->can('course.update');
+        if ($user->hasAnyRole(['Super Admin', 'Admin', 'super_admin'])) {
+            return true;
+        }
+
+        if ($course->created_by === $user->id) {
+            return $user->can('course.update');
+        }
+
+        return app(PermissionResolver::class)->can($user, 'course.update', $course);
     }
 
     public function delete(User $user, Course $course): bool
     {
-        return $user->can('course.delete');
+        if ($user->hasAnyRole(['Super Admin', 'Admin', 'super_admin'])) {
+            return true;
+        }
+
+        if ($course->created_by === $user->id) {
+            return $user->can('course.delete');
+        }
+
+        return app(PermissionResolver::class)->can($user, 'course.delete', $course);
     }
 
     public function publish(User $user, Course $course): bool

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources;
 
+use App\Domain\Identity\Actions\ImpersonateUser;
 use App\Domain\Identity\Enums\Gender;
 use App\Domain\Identity\Enums\UserStatus;
 use App\Domain\Identity\Models\User;
@@ -119,6 +120,19 @@ class UserResource extends Resource
                     ->relationship('roles', 'name'),
             ])
             ->actions([
+                Tables\Actions\Action::make('impersonate')
+                    ->label('Impersonate')
+                    ->icon('heroicon-o-arrow-right-on-rectangle')
+                    ->color('warning')
+                    ->requiresConfirmation()
+                    ->visible(fn (User $record): bool => (auth()->user()?->can('user.impersonate') ?? false) && auth()->id() !== $record->id)
+                    ->action(function (User $record, ImpersonateUser $action) {
+                        /** @var User $admin */
+                        $admin = auth()->user();
+                        $action->execute($admin, $record);
+
+                        return redirect()->to('/');
+                    }),
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
