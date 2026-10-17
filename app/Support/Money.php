@@ -61,6 +61,11 @@ final readonly class Money implements JsonSerializable, Stringable
         return $this->amount;
     }
 
+    public function getAmount(): int
+    {
+        return $this->amount;
+    }
+
     public function getCurrency(): string
     {
         return $this->currency;
@@ -146,6 +151,11 @@ final readonly class Money implements JsonSerializable, Stringable
         }
 
         return $config['symbol'].number_format($major, $config['decimals']);
+    }
+
+    public function getFormatted(): string
+    {
+        return $this->format();
     }
 
     /**

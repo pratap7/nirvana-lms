@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Domain\Billing\Gateways\PaymentGateway;
+use App\Domain\Billing\Gateways\StripePaymentGateway;
 use App\Domain\Catalog\Services\Video\BunnyStreamVideoProvider;
 use App\Domain\Catalog\Services\Video\NullVideoProvider;
 use App\Domain\Catalog\Services\Video\VideoProvider;
@@ -40,6 +42,9 @@ class AppServiceProvider extends ServiceProvider
                 'google_meet' => new GoogleMeetProvider,
                 default => new NullMeetingProvider,
             };
+        });
+        $this->app->singleton(PaymentGateway::class, function () {
+            return new StripePaymentGateway;
         });
     }
 

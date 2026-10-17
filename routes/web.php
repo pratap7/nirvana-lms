@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 use App\Domain\Catalog\Models\Course;
 use App\Domain\Identity\Actions\StopImpersonating;
+use App\Http\Controllers\BillingWebhookController;
 use App\Http\Controllers\CalendarFeedController;
 use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\HealthCheckController;
+use App\Http\Controllers\InvoiceController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -37,3 +39,8 @@ Route::middleware('auth')->group(function (): void {
     Route::post('/enroll', [EnrollmentController::class, 'store'])->name('enrollments.store');
     Route::get('/enrollments/{enrollment}/timeline', [EnrollmentController::class, 'timeline'])->name('enrollments.timeline');
 });
+
+// Billing & Payment Routes per spec (Section F)
+Route::post('/webhooks/stripe', [BillingWebhookController::class, 'handleStripe'])->name('webhooks.stripe');
+Route::get('/invoices/{invoice}/status', [InvoiceController::class, 'status'])->name('invoices.status');
+Route::get('/invoices/{invoice}', [InvoiceController::class, 'viewInvoice'])->name('invoices.view');
