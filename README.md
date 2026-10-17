@@ -2,79 +2,103 @@
 
 A production-grade Learning Management System tailored for Yoga, Ayurveda, Philosophy, and Psychology institutes.
 
+[![CI](https://github.com/pratap7/nirvana-lms/actions/workflows/ci.yml/badge.svg)](https://github.com/pratap7/nirvana-lms/actions/workflows/ci.yml)
+
+---
+
+## Quick Start (Under 10 Minutes)
+
+You can run the app locally using either **Docker Compose** or **Local PHP / SQLite / MySQL**.
+
+### Option A: Using Docker Compose (Recommended)
+
+1. **Clone the repository**:
+   ```bash
+   git clone git@github.com:pratap7/nirvana-lms.git
+   cd nirvana-lms
+   ```
+
+2. **Setup environment & start containers**:
+   ```bash
+   cp .env.example .env
+   make up
+   ```
+
+3. **Install dependencies & run migrations**:
+   ```bash
+   docker compose exec app composer install
+   docker compose exec app php artisan key:generate
+   docker compose exec app php artisan migrate:fresh --seed
+   ```
+
+4. **Access the application**:
+   - **Public Home**: [http://localhost:8000](http://localhost:8000)
+   - **Admin Panel**: [http://localhost:8000/admin](http://localhost:8000/admin)
+   - **System Health Check**: [http://localhost:8000/health](http://localhost:8000/health)
+   - **Mailpit UI (Emails)**: [http://localhost:8025](http://localhost:8025)
+
+---
+
+### Option B: Local Development
+
+1. **Setup dependencies & database**:
+   ```bash
+   make setup
+   ```
+   *(Copies `.env.example`, runs `composer install`, generates key, and runs migrations with seeders).*
+
+2. **Start the local server**:
+   ```bash
+   make serve
+   ```
+   Server is live at `http://localhost:8000`.
+
+---
+
+## Default Login Credentials
+
+| Role | Email | Password | Access |
+|---|---|---|---|
+| **Super Admin** | `admin@pramana-institute.org` | `Pramana@2026!` | Full Admin Panel (`/admin`) |
+| **Teacher** | `teacher@pramana-institute.org` | `Pramana@2026!` | Teacher Portal / Batch management |
+| **Student** | `student@pramana-institute.org` | `Pramana@2026!` | Student Portal / Enrollments |
+
+---
+
 ## Tech Stack
 
-- **Framework**: Laravel 12 (PHP 8.3+)
-- **Database**: MySQL 8 / SQLite (InnoDB, `utf8mb4_unicode_ci`)
-- **Cache, Queues, Sessions**: Redis / Horizon
-- **Admin & Moderator Panels**: Filament 3
-- **Frontend / Student & Teacher Portals**: Livewire 3 + Alpine.js + Tailwind CSS
-- **Testing & Code Quality**: Pest PHP, Laravel Pint, Larastan (PHPStan Level 6)
+- **PHP**: 8.3+
+- **Framework**: Laravel 12
+- **Database**: MySQL 8.0 (InnoDB, `utf8mb4_unicode_ci`) / SQLite for local tests
+- **Cache, Queues, Sessions**: Redis & Laravel Horizon
+- **Admin & Moderator Panels**: Filament 3 (with custom saffron/amber theme)
+- **Frontend**: Livewire 3 + Alpine.js + Tailwind CSS
+- **Testing & Quality**: Pest PHP, Laravel Pint, Larastan (PHPStan Level 6)
 - **Key Packages**:
-  - `spatie/laravel-permission` (Granular permissions + scoped role assignments)
+  - `spatie/laravel-permission` (Granular permissions + scoped & expiring roles)
   - `spatie/laravel-activitylog` (Full state-change audit logging)
-  - `spatie/laravel-medialibrary` (S3/local media management)
-  - `barryvdh/laravel-dompdf` (Certificate & invoice PDF generation)
-  - `maatwebsite/excel` (Report exports)
-  - `laravel/horizon` & `laravel/sanctum`
+  - `spatie/laravel-medialibrary` (Private S3/local file storage)
+  - `barryvdh/laravel-dompdf` (PDF generation for certificates & invoices)
+  - `maatwebsite/excel` (Excel reporting exports)
+  - `axllent/mailpit` (Local email testing)
 
 ---
 
-## Architecture Principles
+## Common Makefile Commands
 
-- **Modular Monolith**: Organized under `app/Domain/{Identity, Catalog, Scheduling, Enrollment, Billing, Learning, Assessment, Certification, Events, Communication, Reporting, Wellbeing}`.
-- **Permission-Based Authorization**: Over 86 granular permissions (`course.publish`, `attendance.mark`, etc.). Code never hardcodes role names.
-- **Scoped & Expiring Roles**: Guest teachers and branch-specific roles are assigned with scopes and expiry timestamps.
-- **Financial Precision**: All monetary values are handled using the immutable `Money` Value Object stored as unsigned `BIGINT` in **paise** (1 ₹ = 100 paise), avoiding floating-point inaccuracies.
-- **Public Security**: Every model features ULIDs (`HasUlid`) for route-model binding to never expose auto-increment IDs.
-- **Explicit State Machines**: Core entities (Course, Batch, Enrollment, Payment) enforce typed enum state transitions via `HasStateMachine`.
-
----
-
-## Getting Started
-
-### 1. Clone & Install Dependencies
-
-```bash
-git clone https://github.com/pratap7/nirvana-lms.git
-cd nirvana-lms
-
-composer install
-npm install
-```
-
-### 2. Environment Setup
-
-```bash
-cp .env.example .env
-php artisan key:generate
-```
-
-### 3. Database Migration & Seeding
-
-```bash
-php artisan migrate:fresh --seed
-```
-
-### Default Credentials
-
-- **Admin Portal**: `http://localhost:8000/admin`
-  - **Email**: `admin@pramana-institute.org`
-  - **Password**: `Pramana@2026!`
-- **Teacher Account**: `teacher@pramana-institute.org` (Password: `Pramana@2026!`)
-- **Student Account**: `student@pramana-institute.org` (Password: `Pramana@2026!`)
+| Command | Description |
+|---|---|
+| `make test` | Run entire quality pipeline: Pint (style) + Larastan (Level 6) + Pest (tests) |
+| `make up` | Start Docker containers (`app`, `web`, `mysql`, `redis`, `mailpit`) in background |
+| `make down` | Stop Docker containers |
+| `make logs` | Stream Docker container logs |
+| `make fresh` | Drop all database tables, re-run all migrations, and re-seed |
+| `make pint` | Automatically fix code styling issues with Laravel Pint |
+| `make analyse`| Run Larastan static analysis at Level 6 |
+| `make serve` | Start local PHP development server on port 8000 |
 
 ---
 
-## Quality Checks & Testing
+## Architecture & Conventions
 
-```bash
-# Run Pest test suite
-./vendor/bin/pest
-
-# Run Larastan (PHPStan Level 6)
-./vendor/bin/phpstan analyse --memory-limit=512M
-
-# Run Laravel Pint code style checks
-./vendor/bin/pint --test
-```
+Detailed architectural rules, domain module boundaries, BaseAction patterns, Money value objects, and permission matrices are documented in [app/Domain/README.md](app/Domain/README.md).

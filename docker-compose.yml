@@ -1,0 +1,95 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: nirvana_app
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+    environment:
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: ${DB_DATABASE:-nirvana_lms}
+      DB_USERNAME: ${DB_USERNAME:-nirvana_user}
+      DB_PASSWORD: ${DB_PASSWORD:-nirvana_secret}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      MAIL_MAILER: smtp
+      MAIL_HOST: mailpit
+      MAIL_PORT: 1025
+      MAIL_SCHEME: null
+    depends_on:
+      - mysql
+      - redis
+    networks:
+      - nirvana_network
+
+  web:
+    image: nginx:alpine
+    container_name: nirvana_nginx
+    restart: unless-stopped
+    ports:
+      - "${FORWARD_HTTP_PORT:-8000}:80"
+    volumes:
+      - ./:/var/www/html
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - app
+    networks:
+      - nirvana_network
+
+  mysql:
+    image: mysql:8.0
+    container_name: nirvana_mysql
+    restart: unless-stopped
+    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root_secret}
+      MYSQL_DATABASE: ${DB_DATABASE:-nirvana_lms}
+      MYSQL_USER: ${DB_USERNAME:-nirvana_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-nirvana_secret}
+    ports:
+      - "${FORWARD_DB_PORT:-3306}:3306"
+    volumes:
+      - nirvana_mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-p${DB_ROOT_PASSWORD:-root_secret}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - nirvana_network
+
+  redis:
+    image: redis:alpine
+    container_name: nirvana_redis
+    restart: unless-stopped
+    ports:
+      - "${FORWARD_REDIS_PORT:-6379}:6379"
+    volumes:
+      - nirvana_redis_data:/data
+    networks:
+      - nirvana_network
+
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: nirvana_mailpit
+    restart: unless-stopped
+    ports:
+      - "${FORWARD_MAIL_PORT:-1025}:1025"
+      - "${FORWARD_MAIL_UI_PORT:-8025}:8025"
+    networks:
+      - nirvana_network
+
+networks:
+  nirvana_network:
+    driver: bridge
+
+volumes:
+  nirvana_mysql_data:
+    driver: local
+  nirvana_redis_data:
+    driver: local
