@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Domain\Catalog\Services\Video\BunnyStreamVideoProvider;
+use App\Domain\Catalog\Services\Video\NullVideoProvider;
+use App\Domain\Catalog\Services\Video\VideoProvider;
 use App\Domain\Identity\Models\User;
 use App\Domain\Identity\Services\PermissionResolver;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -17,6 +20,14 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(PermissionResolver::class);
+        $this->app->singleton(VideoProvider::class, function () {
+            $driver = config('services.video.driver', 'null');
+
+            return match ($driver) {
+                'bunny' => new BunnyStreamVideoProvider,
+                default => new NullVideoProvider,
+            };
+        });
     }
 
     /**

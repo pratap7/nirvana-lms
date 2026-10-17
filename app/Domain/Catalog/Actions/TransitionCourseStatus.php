@@ -24,6 +24,10 @@ final class TransitionCourseStatus
                 ]);
 
                 event(new CoursePublished($course));
+            } elseif ($targetStatus === CourseStatus::Cancelled) {
+                $course->update([
+                    'cancelled_at' => now(),
+                ]);
             }
 
             return $course->fresh();

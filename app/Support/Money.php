@@ -48,6 +48,24 @@ final readonly class Money implements JsonSerializable, Stringable
         return new self($amount, $currency);
     }
 
+    /**
+     * Create from a minor-unit value (e.g. paise directly).
+     */
+    public static function fromMinor(int $minorUnits, string $currency = 'INR'): self
+    {
+        return new self($minorUnits, $currency);
+    }
+
+    public function getMinorAmount(): int
+    {
+        return $this->amount;
+    }
+
+    public function getCurrency(): string
+    {
+        return $this->currency;
+    }
+
     public static function zero(string $currency = 'INR'): self
     {
         return new self(0, $currency);

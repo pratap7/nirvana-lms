@@ -8,11 +8,11 @@ namespace App\Domain\Catalog\Enums;
  * Course lifecycle state machine.
  *
  * Transitions:
- *   Draft → InReview (submit_for_review)
- *   InReview → Draft (request_changes)
- *   InReview → Published (approve)
- *   Published → Archived (archive)
- *   Archived → Draft (reactivate)
+ *   Draft → InReview, Cancelled
+ *   InReview → Draft, Published, Cancelled
+ *   Published → Archived, Cancelled
+ *   Archived → Draft
+ *   Cancelled → []
  */
 enum CourseStatus: string
 {
@@ -20,6 +20,7 @@ enum CourseStatus: string
     case InReview = 'in_review';
     case Published = 'published';
     case Archived = 'archived';
+    case Cancelled = 'cancelled';
 
     /**
      * @return array<self>
@@ -27,10 +28,11 @@ enum CourseStatus: string
     public function allowedTransitions(): array
     {
         return match ($this) {
-            self::Draft => [self::InReview],
-            self::InReview => [self::Draft, self::Published],
-            self::Published => [self::Archived],
+            self::Draft => [self::InReview, self::Cancelled],
+            self::InReview => [self::Draft, self::Published, self::Cancelled],
+            self::Published => [self::Archived, self::Cancelled],
             self::Archived => [self::Draft],
+            self::Cancelled => [],
         };
     }
 
@@ -46,6 +48,7 @@ enum CourseStatus: string
             self::InReview => 'In Review',
             self::Published => 'Published',
             self::Archived => 'Archived',
+            self::Cancelled => 'Cancelled',
         };
     }
 
@@ -56,6 +59,7 @@ enum CourseStatus: string
             self::InReview => 'warning',
             self::Published => 'success',
             self::Archived => 'danger',
+            self::Cancelled => 'danger',
         };
     }
 }
