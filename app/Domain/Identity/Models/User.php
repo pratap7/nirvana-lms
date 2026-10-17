@@ -92,6 +92,7 @@ class User extends Authenticatable implements FilamentUser, HasName, MustVerifyE
         'deactivated_at',
         'timezone',
         'locale',
+        'calendar_token',
         'metadata',
         'last_login_at',
     ];
@@ -100,6 +101,7 @@ class User extends Authenticatable implements FilamentUser, HasName, MustVerifyE
         'id',
         'password',
         'remember_token',
+        'calendar_token',
         'two_factor_secret',
         'two_factor_recovery_codes',
     ];
@@ -164,6 +166,11 @@ class User extends Authenticatable implements FilamentUser, HasName, MustVerifyE
         return "{$this->first_name} {$this->last_name}";
     }
 
+    public function getNameAttribute(): string
+    {
+        return $this->full_name;
+    }
+
     public function hasTwoFactorEnabled(): bool
     {
         return $this->two_factor_secret !== null && $this->two_factor_confirmed_at !== null;
@@ -183,6 +190,23 @@ class User extends Authenticatable implements FilamentUser, HasName, MustVerifyE
             'status' => UserStatus::Suspended,
             'deactivated_at' => now(),
         ]);
+    }
+
+    public function getCalendarToken(): string
+    {
+        if (empty($this->calendar_token)) {
+            $token = bin2hex(random_bytes(32));
+            $this->updateQuietly(['calendar_token' => $token]);
+
+            return $token;
+        }
+
+        return $this->calendar_token;
+    }
+
+    public function getIcsFeedUrl(): string
+    {
+        return url('/calendar/feed/'.$this->getCalendarToken().'.ics');
     }
 
     public function reactivate(): void
