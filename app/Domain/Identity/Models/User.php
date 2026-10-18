@@ -76,6 +76,7 @@ class User extends Authenticatable implements FilamentUser, HasName, MustVerifyE
         'first_name',
         'last_name',
         'email',
+        'email_verified_at',
         'phone',
         'password',
         'date_of_birth',
@@ -104,6 +105,8 @@ class User extends Authenticatable implements FilamentUser, HasName, MustVerifyE
         'social_links',
         'metadata',
         'last_login_at',
+        'quiet_hours_start',
+        'quiet_hours_end',
     ];
 
     protected $hidden = [

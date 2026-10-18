@@ -65,7 +65,27 @@ class Venue extends Model
         'postal_code',
         'timezone',
         'is_active',
+        'code',
+        'address',
+        'capacity',
     ];
+
+    public function setCapacityAttribute(mixed $value): void
+    {
+        // virtual / premise capacity
+    }
+
+    public function setAddressAttribute(mixed $value): void
+    {
+        $this->attributes['address_line_1'] = is_string($value) ? $value : '';
+    }
+
+    public function setCodeAttribute(mixed $value): void
+    {
+        if (empty($this->attributes['slug']) && ! empty($value)) {
+            $this->attributes['slug'] = (string) $value;
+        }
+    }
 
     protected $hidden = ['id'];
 

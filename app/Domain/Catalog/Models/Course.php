@@ -132,6 +132,10 @@ class Course extends Model implements HasMedia
         'completion_rules',
         'created_by',
         'approved_by',
+        'delivery_mode',
+        'fee_amount',
+        'fee_currency',
+        'duration_weeks',
     ];
 
     protected $hidden = ['id'];
@@ -191,6 +195,26 @@ class Course extends Model implements HasMedia
     {
         $this->attributes['base_fee_amount'] = $money->getMinorAmount();
         $this->attributes['base_fee_currency'] = $money->getCurrency();
+    }
+
+    public function setDeliveryModeAttribute(DeliveryMode|string $value): void
+    {
+        $this->attributes['default_delivery_mode'] = is_string($value) ? $value : $value->value;
+    }
+
+    public function setFeeAmountAttribute(int|float $value): void
+    {
+        $this->attributes['base_fee_amount'] = (int) $value;
+    }
+
+    public function setFeeCurrencyAttribute(string $value): void
+    {
+        $this->attributes['base_fee_currency'] = $value;
+    }
+
+    public function setDurationWeeksAttribute(int|float $value): void
+    {
+        $this->attributes['duration_hours'] = (int) ($value * 10);
     }
 
     public function getCompletionRulesAttribute(?string $value): CompletionRule

@@ -36,7 +36,19 @@ class InstallmentPlan extends Model
         'frequency_days',
         'grace_days',
         'status',
+        'total_amount',
+        'currency',
     ];
+
+    public function setTotalAmountAttribute(mixed $value): void
+    {
+        // virtual / stored on invoice
+    }
+
+    public function setCurrencyAttribute(mixed $value): void
+    {
+        // virtual / stored on invoice
+    }
 
     protected $hidden = ['id'];
 

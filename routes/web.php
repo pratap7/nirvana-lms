@@ -12,12 +12,15 @@ use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\EventIcsController;
 use App\Http\Controllers\HealthCheckController;
 use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\PrivateFileDownloadController;
 use App\Http\Controllers\PublicArticleController;
 use App\Http\Controllers\PublicCatalogController;
 use App\Http\Controllers\PublicEventController;
 use App\Http\Controllers\PublicFacultyController;
 use App\Http\Controllers\PublicSiteController;
 use App\Http\Controllers\Student\StudentLearningController;
+use App\Http\Middleware\EnsureUserIsModerator;
+use App\Http\Middleware\EnsureUserIsTeacher;
 use App\Livewire\Certification\CertificateVerification;
 use App\Livewire\Certification\StudentCompletionChecklist;
 use App\Livewire\Communication\NotificationOutboxDashboard;
@@ -54,7 +57,9 @@ Route::get('/faculty', [PublicFacultyController::class, 'index'])->name('faculty
 Route::get('/faculty/{user:ulid}', [PublicFacultyController::class, 'show'])->name('faculty.show');
 Route::get('/about', [PublicSiteController::class, 'about'])->name('about');
 Route::get('/contact', [PublicSiteController::class, 'contact'])->name('contact');
-Route::post('/contact', [PublicSiteController::class, 'contactSubmit'])->name('contact.submit');
+Route::post('/contact', [PublicSiteController::class, 'contactSubmit'])
+    ->name('contact.submit')
+    ->middleware('throttle:contact');
 Route::get('/articles', [PublicArticleController::class, 'index'])->name('articles.index');
 Route::get('/articles/{slug}', [PublicArticleController::class, 'show'])->name('articles.show');
 Route::get('/faq', [PublicSiteController::class, 'faq'])->name('faq');
@@ -90,9 +95,16 @@ Route::middleware('auth')->group(function (): void {
 });
 
 // Billing & Payment Routes per spec (Section F)
-Route::post('/webhooks/stripe', [BillingWebhookController::class, 'handleStripe'])->name('webhooks.stripe');
+Route::post('/webhooks/stripe', [BillingWebhookController::class, 'handleStripe'])
+    ->name('webhooks.stripe')
+    ->middleware('throttle:webhooks');
 Route::get('/invoices/{invoice}/status', [InvoiceController::class, 'status'])->name('invoices.status');
 Route::get('/invoices/{invoice}', [InvoiceController::class, 'viewInvoice'])->name('invoices.view');
+
+// Signed Private-File URL Route (OWASP ASVS IDOR / Tamper Protected)
+Route::get('/secure/download/{type}/{id}', [PrivateFileDownloadController::class, 'download'])
+    ->name('secure.download')
+    ->middleware('signed');
 
 // Student Portal Routes per spec (Section D)
 Route::middleware('auth')->prefix('student')->name('student.')->group(function (): void {
@@ -112,7 +124,7 @@ Route::middleware('auth')->prefix('student')->name('student.')->group(function (
 });
 
 // Teacher Portal Routes per spec (Section E)
-Route::middleware('auth')->prefix('teacher')->name('teacher.')->group(function (): void {
+Route::middleware(['auth', EnsureUserIsTeacher::class])->prefix('teacher')->name('teacher.')->group(function (): void {
     Route::get('/dashboard', TeacherDashboard::class)->name('dashboard');
     Route::get('/roster/{batch?}', BatchRoster::class)->name('roster');
     Route::get('/attendance/{session?}', AttendanceMarker::class)->name('attendance');
@@ -124,7 +136,7 @@ Route::middleware('auth')->prefix('teacher')->name('teacher.')->group(function (
 });
 
 // Academic Moderator Console Routes
-Route::middleware('auth')->prefix('moderator')->name('moderator.')->group(function (): void {
+Route::middleware(['auth', EnsureUserIsModerator::class])->prefix('moderator')->name('moderator.')->group(function (): void {
     Route::get('/console', ModeratorConsole::class)->name('console');
     Route::get('/communication/outbox', NotificationOutboxDashboard::class)->name('communication.outbox');
     Route::get('/communication/templates', TemplateManager::class)->name('communication.templates');
@@ -147,7 +159,7 @@ Route::middleware('auth')->prefix('moderator/events')->name('events.')->group(fu
 });
 
 // Public Certificate Verification & Open Badges (Rate-limited per Section G spec)
-Route::middleware('throttle:60,1')->group(function (): void {
+Route::middleware('throttle:verification')->group(function (): void {
     Route::get('/verify/{publicToken}', CertificateVerification::class)->name('certificates.verify');
     Route::get('/verify/{publicToken}/badge.json', [CertificateVerificationController::class, 'openBadgeJson'])->name('certificates.badge');
     Route::get('/certificates/{publicToken}/download', [CertificateVerificationController::class, 'downloadPdf'])->name('certificates.pdf');

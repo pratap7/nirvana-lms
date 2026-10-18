@@ -50,7 +50,13 @@ class Refund extends Model
         'processed_by',
         'processed_at',
         'notes',
+        'student_id',
     ];
+
+    public function setStudentIdAttribute(mixed $value): void
+    {
+        // virtual / resolved via invoice
+    }
 
     protected $hidden = ['id'];
 

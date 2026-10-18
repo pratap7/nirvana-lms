@@ -88,7 +88,19 @@ class Session extends Model
         'cancellation_reason',
         'rescheduled_from_id',
         'recording_url',
+        'session_number',
+        'course_id',
     ];
+
+    public function setCourseIdAttribute(mixed $value): void
+    {
+        // virtual / resolved through batch
+    }
+
+    public function setSessionNumberAttribute(mixed $value): void
+    {
+        // virtual / order indicator
+    }
 
     protected $hidden = ['id'];
 

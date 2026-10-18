@@ -13,3 +13,4 @@ Schedule::command('lms:send-scheduled-reminders')->everyFifteenMinutes();
 Schedule::command('lms:apply-communication-retention')->dailyAt('02:00');
 Schedule::command('lms:refresh-reporting-summaries')->dailyAt('01:00');
 Schedule::command('lms:send-weekly-admin-report')->weeklyOn(1, '08:00');
+Schedule::command('db:backup')->dailyAt('03:00');

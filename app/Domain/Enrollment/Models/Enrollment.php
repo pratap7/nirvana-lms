@@ -84,7 +84,25 @@ class Enrollment extends Model
         'cancellation_reason',
         'internal_notes',
         'metadata',
+        'enrolled_at',
+        'requested_at',
+        'approved_at',
     ];
+
+    public function setEnrolledAtAttribute(mixed $value): void
+    {
+        $this->attributes['created_at'] = $value;
+    }
+
+    public function setRequestedAtAttribute(mixed $value): void
+    {
+        // virtual / audit
+    }
+
+    public function setApprovedAtAttribute(mixed $value): void
+    {
+        // virtual / audit
+    }
 
     protected $hidden = ['id'];
 

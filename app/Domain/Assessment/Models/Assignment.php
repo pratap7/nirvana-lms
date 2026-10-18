@@ -57,7 +57,19 @@ class Assignment extends Model
         'max_resubmissions',
         'is_published',
         'rubric',
+        'created_by',
+        'module_id',
     ];
+
+    public function setModuleIdAttribute(mixed $value): void
+    {
+        // virtual / module grouping
+    }
+
+    public function setCreatedByAttribute(mixed $value): void
+    {
+        // virtual / audit
+    }
 
     protected $hidden = ['id'];
 

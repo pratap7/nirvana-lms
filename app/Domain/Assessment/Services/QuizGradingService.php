@@ -44,14 +44,14 @@ class QuizGradingService
 
                 $isCorrect = false;
 
-                if ($question->type === 'single_choice' || $question->type === 'true_false') {
+                if (in_array($question->type, ['single_choice', 'mcq_single', 'true_false'], true)) {
                     foreach ($question->options as $opt) {
                         if ($opt['is_correct'] && (string) $opt['id'] === (string) $userAnswer) {
                             $isCorrect = true;
                             break;
                         }
                     }
-                } elseif ($question->type === 'multiple_choice') {
+                } elseif (in_array($question->type, ['multiple_choice', 'mcq_multiple'], true)) {
                     $selected = is_array($userAnswer) ? $userAnswer : [$userAnswer];
                     $correctOptionIds = [];
                     foreach ($question->options as $opt) {

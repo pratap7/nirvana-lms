@@ -33,6 +33,11 @@ class InvoiceController extends Controller
             return response()->json(['error' => 'Invoice not found'], 404);
         }
 
+        $user = auth()->user();
+        if ($user && $user->id !== $invoice->student_id && ! $user->hasRole(['admin', 'super_admin'])) {
+            return response()->json(['error' => 'Unauthorized access to invoice status.'], 403);
+        }
+
         // Optional server-side fetch if webhook was delayed and session_id is provided
         $sessionId = $request->query('session_id');
         if ($sessionId && $invoice->status !== InvoicePaymentStatus::Paid) {
@@ -85,6 +90,15 @@ class InvoiceController extends Controller
             ->with(['items', 'student', 'enrollment.batch', 'course', 'payments.verifier'])
             ->where('ulid', $invoiceUlid)
             ->firstOrFail();
+
+        $user = auth()->user();
+        if (! $user) {
+            abort(401, 'Authentication required to view invoice.');
+        }
+
+        if ($user->id !== $invoice->student_id && ! $user->hasRole(['admin', 'super_admin'])) {
+            abort(403, 'Unauthorized access to invoice (IDOR protected).');
+        }
 
         return view('billing.invoice', [
             'invoice' => $invoice,

@@ -35,7 +35,13 @@ class QuizQuestion extends Model
         'explanation',
         'points',
         'sort_order',
+        'question_type',
     ];
+
+    public function setQuestionTypeAttribute(string $value): void
+    {
+        $this->attributes['type'] = $value;
+    }
 
     protected $hidden = ['id'];
 

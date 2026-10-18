@@ -38,7 +38,13 @@ class GatewayWebhookEvent extends Model
         'is_processed',
         'processed_at',
         'error_message',
+        'received_at',
     ];
+
+    public function setReceivedAtAttribute(mixed $value): void
+    {
+        $this->attributes['created_at'] = $value;
+    }
 
     protected $hidden = ['id'];
 

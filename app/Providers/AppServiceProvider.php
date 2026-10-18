@@ -2,6 +2,10 @@
 
 namespace App\Providers;
 
+use App\Console\Commands\AnalyzeHeavyQueriesCommand;
+use App\Console\Commands\BackupDatabaseCommand;
+use App\Console\Commands\RestoreDatabaseCommand;
+use App\Console\Commands\SeedDemoEnvironmentCommand;
 use App\Domain\Billing\Gateways\PaymentGateway;
 use App\Domain\Billing\Gateways\StripePaymentGateway;
 use App\Domain\Catalog\Services\Video\BunnyStreamVideoProvider;
@@ -25,9 +29,13 @@ use App\Domain\Scheduling\Services\Meeting\GoogleMeetProvider;
 use App\Domain\Scheduling\Services\Meeting\MeetingProvider;
 use App\Domain\Scheduling\Services\Meeting\NullMeetingProvider;
 use App\Domain\Scheduling\Services\Meeting\ZoomMeetingProvider;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Spatie\Activitylog\Models\Activity;
 
@@ -75,6 +83,10 @@ class AppServiceProvider extends ServiceProvider
                 ApplyCommunicationRetentionCommand::class,
                 RefreshReportingSummariesCommand::class,
                 SendWeeklyAdminReportCommand::class,
+                BackupDatabaseCommand::class,
+                RestoreDatabaseCommand::class,
+                AnalyzeHeavyQueriesCommand::class,
+                SeedDemoEnvironmentCommand::class,
             ]);
         }
     }
@@ -114,6 +126,17 @@ class AppServiceProvider extends ServiceProvider
 
             return null; // Fall through to specific policies
         });
+
+        // Strict Eloquent: Catch N+1 lazy loading queries and prevent unhandled mass-assignments
+        Model::preventLazyLoading(! $this->app->isProduction());
+        Model::preventSilentlyDiscardingAttributes(! $this->app->isProduction());
+
+        // OWASP ASVS Rate Limiters
+        RateLimiter::for('auth', fn (Request $request) => Limit::perMinute(5)->by($request->ip()));
+        RateLimiter::for('otp', fn (Request $request) => Limit::perMinute(3)->by($request->user()?->id ?: $request->ip()));
+        RateLimiter::for('webhooks', fn (Request $request) => Limit::perMinute(120)->by($request->ip()));
+        RateLimiter::for('verification', fn (Request $request) => Limit::perMinute(30)->by($request->ip()));
+        RateLimiter::for('contact', fn (Request $request) => Limit::perMinute(5)->by($request->ip()));
 
         // Automatically enrich all activity logs with client IP, user agent, and impersonation context
         Activity::saving(function (Activity $activity): void {

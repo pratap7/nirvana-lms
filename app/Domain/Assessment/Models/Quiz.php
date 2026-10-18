@@ -47,7 +47,19 @@ class Quiz extends Model
         'max_attempts',
         'shuffle_questions',
         'is_published',
+        'time_limit_minutes',
+        'passing_score',
     ];
+
+    public function setTimeLimitMinutesAttribute(int|float $value): void
+    {
+        $this->attributes['duration_minutes'] = (int) $value;
+    }
+
+    public function setPassingScoreAttribute(int|float $value): void
+    {
+        $this->attributes['pass_percentage'] = (int) $value;
+    }
 
     protected $hidden = ['id'];
 

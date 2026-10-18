@@ -53,7 +53,25 @@ class AssignmentSubmission extends Model
         'graded_at',
         'submitted_at',
         'is_late',
+        'batch_id',
+        'submitted_text',
+        'teacher_feedback',
     ];
+
+    public function setTeacherFeedbackAttribute(mixed $value): void
+    {
+        $this->attributes['feedback'] = is_string($value) ? $value : null;
+    }
+
+    public function setSubmittedTextAttribute(mixed $value): void
+    {
+        $this->attributes['text_content'] = is_string($value) ? $value : null;
+    }
+
+    public function setBatchIdAttribute(mixed $value): void
+    {
+        // virtual / resolved through enrollment
+    }
 
     protected $hidden = ['id'];
 

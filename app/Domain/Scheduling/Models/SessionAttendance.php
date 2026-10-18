@@ -52,7 +52,13 @@ class SessionAttendance extends Model
         'correction_reason',
         'marked_by',
         'edited_by',
+        'recorded_at',
     ];
+
+    public function setRecordedAtAttribute(mixed $value): void
+    {
+        $this->attributes['created_at'] = $value;
+    }
 
     protected $hidden = ['id'];
 

@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Exceptions\IllegalStateTransitionException;
+use App\Http\Middleware\SecurityHeadersMiddleware;
 use App\Http\Middleware\SetLocaleMiddleware;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -29,6 +30,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->web(append: [
             SetLocaleMiddleware::class,
+            SecurityHeadersMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

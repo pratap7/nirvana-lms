@@ -84,7 +84,65 @@ class Batch extends Model
         'enrollment_ends_at',
         'status',
         'metadata',
+        'max_capacity',
+        'seat_hold_hours',
+        'allow_waitlist',
+        'auto_promote_waitlist',
+        'requires_approval',
     ];
+
+    public function setSeatHoldHoursAttribute(mixed $value): void
+    {
+        $meta = $this->metadata ?? [];
+        $meta['seat_hold_hours'] = $value;
+        $this->metadata = $meta;
+    }
+
+    public function getSeatHoldHoursAttribute(): int
+    {
+        return (int) ($this->metadata['seat_hold_hours'] ?? 48);
+    }
+
+    public function setAllowWaitlistAttribute(mixed $value): void
+    {
+        $meta = $this->metadata ?? [];
+        $meta['allow_waitlist'] = (bool) $value;
+        $this->metadata = $meta;
+    }
+
+    public function getAllowWaitlistAttribute(): bool
+    {
+        return (bool) ($this->metadata['allow_waitlist'] ?? true);
+    }
+
+    public function setAutoPromoteWaitlistAttribute(mixed $value): void
+    {
+        $meta = $this->metadata ?? [];
+        $meta['auto_promote_waitlist'] = (bool) $value;
+        $this->metadata = $meta;
+    }
+
+    public function getAutoPromoteWaitlistAttribute(): bool
+    {
+        return (bool) ($this->metadata['auto_promote_waitlist'] ?? true);
+    }
+
+    public function setRequiresApprovalAttribute(mixed $value): void
+    {
+        $meta = $this->metadata ?? [];
+        $meta['requires_approval'] = (bool) $value;
+        $this->metadata = $meta;
+    }
+
+    public function getRequiresApprovalAttribute(): bool
+    {
+        return (bool) ($this->metadata['requires_approval'] ?? false);
+    }
+
+    public function setMaxCapacityAttribute(int|float $value): void
+    {
+        $this->attributes['capacity'] = (int) $value;
+    }
 
     protected $hidden = ['id'];
 
