@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Assessment\Models;
 
+use App\Domain\Assessment\Enums\AssessmentType;
 use App\Domain\Catalog\Models\Course;
 use App\Domain\Catalog\Models\Lesson;
 use App\Domain\Identity\Models\User;
@@ -46,8 +47,10 @@ class Assignment extends Model
         'batch_id',
         'lesson_id',
         'title',
+        'assessment_type',
         'description',
         'submission_types',
+        'requires_video',
         'max_score',
         'due_at',
         'allow_late',
@@ -65,6 +68,8 @@ class Assignment extends Model
     {
         return [
             'submission_types' => 'array',
+            'assessment_type' => AssessmentType::class,
+            'requires_video' => 'boolean',
             'rubric' => 'array',
             'max_score' => 'integer',
             'due_at' => 'datetime',

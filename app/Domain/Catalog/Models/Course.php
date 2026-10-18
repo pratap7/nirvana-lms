@@ -156,6 +156,7 @@ class Course extends Model implements HasMedia
             'cancelled_at' => 'datetime',
             'sort_order' => 'integer',
             'metadata' => 'array',
+            'completion_rules' => 'array',
         ];
     }
 

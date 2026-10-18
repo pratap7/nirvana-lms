@@ -6,11 +6,14 @@ use App\Domain\Catalog\Models\Course;
 use App\Domain\Identity\Actions\StopImpersonating;
 use App\Http\Controllers\BillingWebhookController;
 use App\Http\Controllers\CalendarFeedController;
+use App\Http\Controllers\CertificateVerificationController;
 use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\EventIcsController;
 use App\Http\Controllers\HealthCheckController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\Student\StudentLearningController;
+use App\Livewire\Certification\CertificateVerification;
+use App\Livewire\Certification\StudentCompletionChecklist;
 use App\Livewire\Events\EventAttendanceReport;
 use App\Livewire\Events\EventShow;
 use App\Livewire\Events\StaffEventCheckIn;
@@ -75,6 +78,7 @@ Route::middleware('auth')->prefix('student')->name('student.')->group(function (
     Route::get('/schedule', AttendanceSchedule::class)->name('schedule');
     Route::get('/payments', PaymentHistory::class)->name('payments');
     Route::get('/profile', StudentProfile::class)->name('profile');
+    Route::get('/courses/{courseSlug}/completion/{batchId?}', StudentCompletionChecklist::class)->name('completion.checklist');
 
     // Streaming, Downloads & Playback Ping
     Route::get('/lessons/{lesson}/stream', [StudentLearningController::class, 'streamVideo'])->name('lessons.stream');
@@ -107,4 +111,11 @@ Route::get('/events/{event:slug}/ics', EventIcsController::class)->name('events.
 Route::middleware('auth')->prefix('moderator/events')->name('events.')->group(function (): void {
     Route::get('/check-in/{event?}', StaffEventCheckIn::class)->name('checkin');
     Route::get('/{event}/report', EventAttendanceReport::class)->name('report');
+});
+
+// Public Certificate Verification & Open Badges (Rate-limited per Section G spec)
+Route::middleware('throttle:60,1')->group(function (): void {
+    Route::get('/verify/{publicToken}', CertificateVerification::class)->name('certificates.verify');
+    Route::get('/verify/{publicToken}/badge.json', [CertificateVerificationController::class, 'openBadgeJson'])->name('certificates.badge');
+    Route::get('/certificates/{publicToken}/download', [CertificateVerificationController::class, 'downloadPdf'])->name('certificates.pdf');
 });
