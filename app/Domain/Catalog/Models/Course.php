@@ -9,6 +9,7 @@ use App\Domain\Catalog\Enums\CourseType;
 use App\Domain\Catalog\Enums\DeliveryMode;
 use App\Domain\Catalog\Enums\DifficultyLevel;
 use App\Domain\Catalog\ValueObjects\CompletionRule;
+use App\Domain\Cms\Models\Testimonial;
 use App\Domain\Enrollment\Models\Enrollment;
 use App\Domain\Identity\Models\Branch;
 use App\Domain\Identity\Models\User;
@@ -314,6 +315,14 @@ class Course extends Model implements HasMedia
     public function approvedReviews(): HasMany
     {
         return $this->hasMany(CourseReview::class)->approved();
+    }
+
+    /**
+     * @return HasMany<Testimonial, $this>
+     */
+    public function testimonials(): HasMany
+    {
+        return $this->hasMany(Testimonial::class);
     }
 
     /**

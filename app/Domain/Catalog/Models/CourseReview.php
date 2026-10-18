@@ -84,6 +84,14 @@ class CourseReview extends Model
     /**
      * @return BelongsTo<User, $this>
      */
+    public function student(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function moderator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'moderated_by');

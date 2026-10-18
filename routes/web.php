@@ -12,6 +12,11 @@ use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\EventIcsController;
 use App\Http\Controllers\HealthCheckController;
 use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\PublicArticleController;
+use App\Http\Controllers\PublicCatalogController;
+use App\Http\Controllers\PublicEventController;
+use App\Http\Controllers\PublicFacultyController;
+use App\Http\Controllers\PublicSiteController;
 use App\Http\Controllers\Student\StudentLearningController;
 use App\Livewire\Certification\CertificateVerification;
 use App\Livewire\Certification\StudentCompletionChecklist;
@@ -39,9 +44,25 @@ use App\Livewire\Teacher\TeacherDashboard;
 use App\Livewire\Teacher\WellbeingEscalation;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// Public Site Routes (Section H - Public Site)
+Route::get('/', [PublicSiteController::class, 'home'])->name('home');
+Route::get('/courses', [PublicCatalogController::class, 'index'])->name('courses.index');
+Route::get('/courses/{slug}', [PublicCatalogController::class, 'show'])->name('courses.show');
+Route::get('/schedule', [PublicSiteController::class, 'schedule'])->name('schedule');
+Route::get('/events-calendar', [PublicEventController::class, 'calendar'])->name('events.calendar');
+Route::get('/faculty', [PublicFacultyController::class, 'index'])->name('faculty.index');
+Route::get('/faculty/{user:ulid}', [PublicFacultyController::class, 'show'])->name('faculty.show');
+Route::get('/about', [PublicSiteController::class, 'about'])->name('about');
+Route::get('/contact', [PublicSiteController::class, 'contact'])->name('contact');
+Route::post('/contact', [PublicSiteController::class, 'contactSubmit'])->name('contact.submit');
+Route::get('/articles', [PublicArticleController::class, 'index'])->name('articles.index');
+Route::get('/articles/{slug}', [PublicArticleController::class, 'show'])->name('articles.show');
+Route::get('/faq', [PublicSiteController::class, 'faq'])->name('faq');
+Route::get('/testimonials', [PublicSiteController::class, 'testimonials'])->name('testimonials');
+Route::get('/sitemap.xml', [PublicSiteController::class, 'sitemap'])->name('sitemap');
+Route::get('/robots.txt', [PublicSiteController::class, 'robots'])->name('robots');
+Route::get('/set-locale/{locale}', [PublicSiteController::class, 'setLocale'])->name('set-locale');
+Route::get('/login', fn () => redirect('/admin/login'))->name('login');
 
 Route::get('/health', HealthCheckController::class)->name('health');
 

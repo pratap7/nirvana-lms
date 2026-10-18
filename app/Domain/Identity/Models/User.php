@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Identity\Models;
 
+use App\Domain\Catalog\Models\Course;
 use App\Domain\Enrollment\Models\Enrollment;
 use App\Domain\Identity\Enums\Gender;
 use App\Domain\Identity\Enums\UserStatus;
@@ -13,9 +14,11 @@ use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasName;
 use Filament\Panel;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -94,6 +97,11 @@ class User extends Authenticatable implements FilamentUser, HasName, MustVerifyE
         'timezone',
         'locale',
         'calendar_token',
+        'headline',
+        'bio',
+        'lineage',
+        'is_featured_faculty',
+        'social_links',
         'metadata',
         'last_login_at',
     ];
@@ -124,6 +132,8 @@ class User extends Authenticatable implements FilamentUser, HasName, MustVerifyE
             'two_factor_secret' => 'encrypted',
             'two_factor_recovery_codes' => 'encrypted:array',
             'two_factor_confirmed_at' => 'datetime',
+            'is_featured_faculty' => 'boolean',
+            'social_links' => 'array',
             'metadata' => 'array',
             'last_login_at' => 'datetime',
         ];
@@ -156,6 +166,29 @@ class User extends Authenticatable implements FilamentUser, HasName, MustVerifyE
     public function deletionRequests(): HasMany
     {
         return $this->hasMany(UserDeletionRequest::class);
+    }
+
+    /**
+     * @return BelongsToMany<Course, $this>
+     */
+    public function taughtCourses(): BelongsToMany
+    {
+        return $this->belongsToMany(Course::class, 'course_teachers')
+            ->withPivot('role', 'sort_order')
+            ->withTimestamps();
+    }
+
+    /**
+     * @param  Builder<User>  $query
+     * @return Builder<User>
+     */
+    public function scopeFaculty(Builder $query): Builder
+    {
+        return $query->where(function (Builder $sub) {
+            $sub->where('is_featured_faculty', true)
+                ->orWhereHas('roles', fn (Builder $r) => $r->where('name', 'Teacher'))
+                ->orWhereHas('taughtCourses');
+        });
     }
 
     // ──────────────────────────────────────────────

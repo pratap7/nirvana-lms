@@ -136,6 +136,26 @@ class Event extends Model implements Certifiable, Enrollable
         ];
     }
 
+    public function getNameAttribute(): string
+    {
+        return $this->title;
+    }
+
+    public function getStartDateAttribute(): ?CarbonInterface
+    {
+        return $this->starts_at;
+    }
+
+    public function getEndDateAttribute(): ?CarbonInterface
+    {
+        return $this->ends_at;
+    }
+
+    public function getModeAttribute(): string
+    {
+        return $this->format->value;
+    }
+
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()

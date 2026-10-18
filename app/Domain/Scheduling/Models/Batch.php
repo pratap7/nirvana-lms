@@ -163,6 +163,16 @@ class Batch extends Model
         return $this->course ? $this->course->fee : Money::zero();
     }
 
+    public function getStartsAtAttribute(): ?CarbonInterface
+    {
+        return $this->start_date;
+    }
+
+    public function getEndsAtAttribute(): ?CarbonInterface
+    {
+        return $this->end_date;
+    }
+
     public function isOpenForEnrollment(): bool
     {
         if ($this->status !== BatchStatus::Open) {
