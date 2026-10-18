@@ -139,6 +139,8 @@ return [
             'diet_log.manage_own' => 'Track daily sattvic diet logs',
             'routine_log.manage_own' => 'Track daily sadhana and yoga routine',
             'wellbeing.view_any' => 'View all wellbeing records (Admin/Lead Acharya)',
+            'concern.report' => 'Submit confidential student wellbeing concerns',
+            'concern.review' => 'Review and resolve escalated student wellbeing concerns',
         ],
     ],
 
@@ -182,6 +184,7 @@ return [
                 'report.attendance',
                 'report.enrollment',
                 'audit.view',
+                'concern.review',
             ],
         ],
         'Teacher' => [
@@ -208,6 +211,7 @@ return [
                 'progress.view_any',
                 'counseling.conduct',
                 'counseling.notes.create',
+                'concern.report',
             ],
         ],
         'Guest Teacher' => [
@@ -222,6 +226,7 @@ return [
                 'assignment.grade',
                 'submission.view',
                 'progress.view_any',
+                'concern.report',
             ],
         ],
         'Student' => [

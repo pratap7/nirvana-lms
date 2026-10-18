@@ -10,6 +10,7 @@ use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\HealthCheckController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\Student\StudentLearningController;
+use App\Livewire\Moderator\ModeratorConsole;
 use App\Livewire\Student\AssignmentPortal;
 use App\Livewire\Student\AttendanceSchedule;
 use App\Livewire\Student\CoursePlayer;
@@ -17,6 +18,14 @@ use App\Livewire\Student\Dashboard;
 use App\Livewire\Student\PaymentHistory;
 use App\Livewire\Student\QuizPlayer;
 use App\Livewire\Student\StudentProfile;
+use App\Livewire\Teacher\AnnouncementManager;
+use App\Livewire\Teacher\AssignmentGrading;
+use App\Livewire\Teacher\AttendanceMarker;
+use App\Livewire\Teacher\BatchMessenger;
+use App\Livewire\Teacher\BatchRoster;
+use App\Livewire\Teacher\SessionManager;
+use App\Livewire\Teacher\TeacherDashboard;
+use App\Livewire\Teacher\WellbeingEscalation;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -67,4 +76,21 @@ Route::middleware('auth')->prefix('student')->name('student.')->group(function (
     Route::get('/lessons/{lesson}/stream', [StudentLearningController::class, 'streamVideo'])->name('lessons.stream');
     Route::get('/resources/{resource}/download', [StudentLearningController::class, 'downloadResource'])->name('resources.download');
     Route::post('/lessons/{lesson}/progress', [StudentLearningController::class, 'updateVideoProgress'])->name('lessons.progress');
+});
+
+// Teacher Portal Routes per spec (Section E)
+Route::middleware('auth')->prefix('teacher')->name('teacher.')->group(function (): void {
+    Route::get('/dashboard', TeacherDashboard::class)->name('dashboard');
+    Route::get('/roster/{batch?}', BatchRoster::class)->name('roster');
+    Route::get('/attendance/{session?}', AttendanceMarker::class)->name('attendance');
+    Route::get('/grading', AssignmentGrading::class)->name('grading');
+    Route::get('/sessions', SessionManager::class)->name('sessions');
+    Route::get('/announcements', AnnouncementManager::class)->name('announcements');
+    Route::get('/messages', BatchMessenger::class)->name('messages');
+    Route::get('/concerns', WellbeingEscalation::class)->name('concerns');
+});
+
+// Academic Moderator Console Routes
+Route::middleware('auth')->prefix('moderator')->name('moderator.')->group(function (): void {
+    Route::get('/console', ModeratorConsole::class)->name('console');
 });

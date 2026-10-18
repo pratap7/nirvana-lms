@@ -53,6 +53,7 @@ class Assignment extends Model
         'allow_late',
         'max_resubmissions',
         'is_published',
+        'rubric',
     ];
 
     protected $hidden = ['id'];
@@ -64,6 +65,7 @@ class Assignment extends Model
     {
         return [
             'submission_types' => 'array',
+            'rubric' => 'array',
             'max_score' => 'integer',
             'due_at' => 'datetime',
             'allow_late' => 'boolean',
