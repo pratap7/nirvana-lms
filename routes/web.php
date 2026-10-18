@@ -7,9 +7,13 @@ use App\Domain\Identity\Actions\StopImpersonating;
 use App\Http\Controllers\BillingWebhookController;
 use App\Http\Controllers\CalendarFeedController;
 use App\Http\Controllers\EnrollmentController;
+use App\Http\Controllers\EventIcsController;
 use App\Http\Controllers\HealthCheckController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\Student\StudentLearningController;
+use App\Livewire\Events\EventAttendanceReport;
+use App\Livewire\Events\EventShow;
+use App\Livewire\Events\StaffEventCheckIn;
 use App\Livewire\Moderator\ModeratorConsole;
 use App\Livewire\Student\AssignmentPortal;
 use App\Livewire\Student\AttendanceSchedule;
@@ -93,4 +97,14 @@ Route::middleware('auth')->prefix('teacher')->name('teacher.')->group(function (
 // Academic Moderator Console Routes
 Route::middleware('auth')->prefix('moderator')->name('moderator.')->group(function (): void {
     Route::get('/console', ModeratorConsole::class)->name('console');
+});
+
+// Events Module Routes (Section C)
+Route::get('/events/{event:slug}', EventShow::class)->name('events.show');
+Route::get('/events/{event:slug}/invite', EventShow::class)->name('events.invite');
+Route::get('/events/{event:slug}/ics', EventIcsController::class)->name('events.ics');
+
+Route::middleware('auth')->prefix('moderator/events')->name('events.')->group(function (): void {
+    Route::get('/check-in/{event?}', StaffEventCheckIn::class)->name('checkin');
+    Route::get('/{event}/report', EventAttendanceReport::class)->name('report');
 });

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Billing\Actions;
 
+use App\Domain\Billing\Contracts\Billable;
 use App\Domain\Billing\Enums\InvoicePaymentStatus;
 use App\Domain\Billing\Events\InvoicePaid;
 use App\Domain\Billing\Models\Invoice;
@@ -25,6 +26,10 @@ class MarkInvoicePaidAction extends BaseAction
 
             // If the invoice is now Paid, check if enrollment should be activated
             if ($status === InvoicePaymentStatus::Paid) {
+                // 1. Check polymorphic Billable entity (e.g. EventRegistration)
+                if ($invoice->billable instanceof Billable) {
+                    $invoice->billable->onPaymentConfirmed($invoice);
+                }
                 if ($invoice->enrollment_id !== null && $invoice->enrollment !== null) {
                     $enrollment = $invoice->enrollment;
                     if ($enrollment->status === EnrollmentStatus::Approved || $enrollment->status === EnrollmentStatus::PaymentPending) {

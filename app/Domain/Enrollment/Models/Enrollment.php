@@ -6,6 +6,7 @@ namespace App\Domain\Enrollment\Models;
 
 use App\Domain\Catalog\Models\Course;
 use App\Domain\Enrollment\Enums\EnrollmentStatus;
+use App\Domain\Events\Models\Event;
 use App\Domain\Identity\Models\User;
 use App\Domain\Scheduling\Models\Batch;
 use App\Support\Concerns\HasStateMachine;
@@ -17,8 +18,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 /**
  * Student course/batch enrollment with full state machine lifecycle.
@@ -63,6 +66,9 @@ class Enrollment extends Model
         'student_id',
         'batch_id',
         'course_id',
+        'event_id',
+        'enrollable_type',
+        'enrollable_id',
         'status',
         'seat_hold_expires_at',
         'waitlist_position',
@@ -111,9 +117,9 @@ class Enrollment extends Model
         ];
     }
 
-    public function getActivitylogOptions(): \Spatie\Activitylog\Support\LogOptions
+    public function getActivitylogOptions(): LogOptions
     {
-        return \Spatie\Activitylog\Support\LogOptions::defaults()
+        return LogOptions::defaults()
             ->logOnly(['status', 'seat_hold_expires_at', 'waitlist_position', 'internal_notes'])
             ->logOnlyDirty()
             ->dontLogEmptyChanges();
@@ -165,6 +171,24 @@ class Enrollment extends Model
     public function transfers(): HasMany
     {
         return $this->hasMany(EnrollmentTransfer::class)->orderBy('created_at', 'desc');
+    }
+
+    /**
+     * @return BelongsTo<Event, $this>
+     */
+    public function event(): BelongsTo
+    {
+        return $this->belongsTo(Event::class);
+    }
+
+    /**
+     * Polymorphic relation to any Enrollable target (Batch, Event, etc.)
+     *
+     * @return MorphTo<Model, $this>
+     */
+    public function enrollable(): MorphTo
+    {
+        return $this->morphTo();
     }
 
     /**

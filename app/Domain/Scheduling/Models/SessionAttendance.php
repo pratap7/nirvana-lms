@@ -11,6 +11,7 @@ use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
@@ -42,6 +43,9 @@ class SessionAttendance extends Model
     protected $fillable = [
         'ulid',
         'session_id',
+        'event_occurrence_id',
+        'attendable_type',
+        'attendable_id',
         'user_id',
         'status',
         'notes',
@@ -67,6 +71,16 @@ class SessionAttendance extends Model
     public function session(): BelongsTo
     {
         return $this->belongsTo(Session::class);
+    }
+
+    /**
+     * Polymorphic relation to any Attendable model (Session, EventOccurrence, etc.)
+     *
+     * @return MorphTo<Model, $this>
+     */
+    public function attendable(): MorphTo
+    {
+        return $this->morphTo();
     }
 
     /**

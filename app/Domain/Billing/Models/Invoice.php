@@ -8,6 +8,7 @@ use App\Domain\Billing\Enums\InvoicePaymentStatus;
 use App\Domain\Billing\Enums\PaymentStatus;
 use App\Domain\Catalog\Models\Course;
 use App\Domain\Enrollment\Models\Enrollment;
+use App\Domain\Events\Models\Event;
 use App\Domain\Identity\Models\User;
 use App\Domain\Scheduling\Models\Batch;
 use App\Support\Concerns\HasUlid;
@@ -20,6 +21,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
 
@@ -77,6 +79,9 @@ class Invoice extends Model
         'enrollment_id',
         'batch_id',
         'course_id',
+        'event_id',
+        'billable_type',
+        'billable_id',
         'subtotal_amount',
         'discount_amount',
         'tax_amount',
@@ -147,6 +152,24 @@ class Invoice extends Model
     public function course(): BelongsTo
     {
         return $this->belongsTo(Course::class);
+    }
+
+    /**
+     * @return BelongsTo<Event, $this>
+     */
+    public function event(): BelongsTo
+    {
+        return $this->belongsTo(Event::class);
+    }
+
+    /**
+     * Polymorphic relation to any Billable entity (Course Enrollment, Event Registration, etc.)
+     *
+     * @return MorphTo<Model, $this>
+     */
+    public function billable(): MorphTo
+    {
+        return $this->morphTo();
     }
 
     /**

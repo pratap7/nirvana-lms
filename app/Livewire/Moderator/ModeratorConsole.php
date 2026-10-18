@@ -122,9 +122,7 @@ class ModeratorConsole extends Component
         /** @var Enrollment $enrollment */
         $enrollment = Enrollment::query()->where('ulid', $this->rejectingEnrollmentUlid)->firstOrFail();
 
-        $transitionAction->execute($enrollment, EnrollmentStatus::Rejected, Auth::user(), [
-            'reason' => $this->rejectionReason,
-        ]);
+        $transitionAction->execute($enrollment, EnrollmentStatus::Rejected, Auth::user(), $this->rejectionReason);
 
         $this->rejectingEnrollmentUlid = null;
         $this->rejectionReason = '';

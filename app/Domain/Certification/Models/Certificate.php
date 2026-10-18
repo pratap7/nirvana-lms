@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domain\Certification\Models;
 
 use App\Domain\Catalog\Models\Course;
+use App\Domain\Events\Models\Event;
 use App\Domain\Identity\Models\User;
 use App\Domain\Scheduling\Models\Batch;
 use App\Support\Concerns\HasUlid;
@@ -12,6 +13,7 @@ use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 /**
  * @property int $id
@@ -38,6 +40,9 @@ class Certificate extends Model
         'user_id',
         'course_id',
         'batch_id',
+        'event_id',
+        'certifiable_type',
+        'certifiable_id',
         'issue_date',
         'template_name',
         'metadata',
@@ -78,5 +83,23 @@ class Certificate extends Model
     public function batch(): BelongsTo
     {
         return $this->belongsTo(Batch::class);
+    }
+
+    /**
+     * @return BelongsTo<Event, $this>
+     */
+    public function event(): BelongsTo
+    {
+        return $this->belongsTo(Event::class);
+    }
+
+    /**
+     * Polymorphic relation to any Certifiable target (Course, Event, etc.)
+     *
+     * @return MorphTo<Model, $this>
+     */
+    public function certifiable(): MorphTo
+    {
+        return $this->morphTo();
     }
 }
