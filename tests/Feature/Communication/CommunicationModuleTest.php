@@ -35,6 +35,7 @@ use App\Domain\Scheduling\Models\Session;
 use App\Domain\Scheduling\Models\Venue;
 use App\Livewire\Communication\NotificationOutboxDashboard;
 use App\Livewire\Communication\TemplateManager;
+use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Database\Seeders\PermissionSeeder;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -313,6 +314,7 @@ test('timezone-aware quiet hours hold non-urgent notices until morning while man
 });
 
 test('WhatsApp Business API provider receives formatted template and parameters', function (): void {
+    Carbon::setTestNow('2026-10-18 14:00:00');
     /** @var LogWhatsAppProvider $whatsAppProvider */
     $whatsAppProvider = app(WhatsAppProvider::class);
 
@@ -324,7 +326,8 @@ test('WhatsApp Business API provider receives formatted template and parameters'
             'student_name' => 'Rohan Verma',
             'session_title' => 'Evening Kirtan',
             'new_starts_at' => '07:00 PM',
-        ]
+        ],
+        sync: true
     );
 
     expect(count($whatsAppProvider->sentMessages))->toBeGreaterThan(0);

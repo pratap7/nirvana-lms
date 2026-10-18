@@ -118,11 +118,16 @@ return [
         ],
 
         'Reporting' => [
+            'report.view' => 'View all reporting dashboards',
             'report.attendance' => 'Generate attendance reports',
             'report.revenue' => 'Generate revenue and billing reports',
             'report.enrollment' => 'Generate enrollment analytics',
             'report.progress' => 'Generate student progress reports',
-            'report.export' => 'Export reports to Excel and PDF',
+            'report.workload' => 'Generate teacher workload reports',
+            'report.certificate' => 'Generate certificate issuance reports',
+            'report.dues' => 'Generate outstanding dues reports',
+            'report.events' => 'Generate event registration reports',
+            'report.export' => 'Export reports to CSV and Excel',
         ],
 
         'Wellbeing' => [
@@ -181,8 +186,15 @@ return [
                 'workshop.list',
                 'announcement.create',
                 'announcement.manage',
+                'report.view',
                 'report.attendance',
                 'report.enrollment',
+                'report.revenue',
+                'report.workload',
+                'report.certificate',
+                'report.dues',
+                'report.events',
+                'report.export',
                 'audit.view',
                 'concern.review',
             ],

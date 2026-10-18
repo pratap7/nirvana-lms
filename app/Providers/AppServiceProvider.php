@@ -16,6 +16,10 @@ use App\Domain\Communication\Services\LogSmsProvider;
 use App\Domain\Communication\Services\LogWhatsAppProvider;
 use App\Domain\Identity\Models\User;
 use App\Domain\Identity\Services\PermissionResolver;
+use App\Domain\Reporting\Commands\RefreshReportingSummariesCommand;
+use App\Domain\Reporting\Commands\SendWeeklyAdminReportCommand;
+use App\Domain\Reporting\Services\ReportExportService;
+use App\Domain\Reporting\Services\ReportingService;
 use App\Domain\Scheduling\Events\SessionRescheduled;
 use App\Domain\Scheduling\Services\Meeting\GoogleMeetProvider;
 use App\Domain\Scheduling\Services\Meeting\MeetingProvider;
@@ -62,10 +66,15 @@ class AppServiceProvider extends ServiceProvider
             return new LogSmsProvider;
         });
 
+        $this->app->singleton(ReportingService::class);
+        $this->app->singleton(ReportExportService::class);
+
         if ($this->app->runningInConsole()) {
             $this->commands([
                 SendScheduledRemindersCommand::class,
                 ApplyCommunicationRetentionCommand::class,
+                RefreshReportingSummariesCommand::class,
+                SendWeeklyAdminReportCommand::class,
             ]);
         }
     }

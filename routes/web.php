@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Domain\Catalog\Models\Course;
 use App\Domain\Identity\Actions\StopImpersonating;
+use App\Domain\Reporting\Controllers\ReportExportDownloadController;
 use App\Http\Controllers\BillingWebhookController;
 use App\Http\Controllers\CalendarFeedController;
 use App\Http\Controllers\CertificateVerificationController;
@@ -20,6 +21,7 @@ use App\Livewire\Events\EventAttendanceReport;
 use App\Livewire\Events\EventShow;
 use App\Livewire\Events\StaffEventCheckIn;
 use App\Livewire\Moderator\ModeratorConsole;
+use App\Livewire\Reporting\ReportingDashboard;
 use App\Livewire\Student\AssignmentPortal;
 use App\Livewire\Student\AttendanceSchedule;
 use App\Livewire\Student\CoursePlayer;
@@ -105,7 +107,13 @@ Route::middleware('auth')->prefix('moderator')->name('moderator.')->group(functi
     Route::get('/console', ModeratorConsole::class)->name('console');
     Route::get('/communication/outbox', NotificationOutboxDashboard::class)->name('communication.outbox');
     Route::get('/communication/templates', TemplateManager::class)->name('communication.templates');
+    Route::get('/reporting', ReportingDashboard::class)->name('reporting.dashboard');
 });
+
+// Signed Report Export Download Route (Section H)
+Route::get('/reporting/exports/{export}/download', ReportExportDownloadController::class)
+    ->name('reporting.exports.download')
+    ->middleware('signed');
 
 // Events Module Routes (Section C)
 Route::get('/events/{event:slug}', EventShow::class)->name('events.show');
