@@ -9,3 +9,5 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('enrollment:release-expired-holds')->hourly();
+Schedule::command('lms:send-scheduled-reminders')->everyFifteenMinutes();
+Schedule::command('lms:apply-communication-retention')->dailyAt('02:00');

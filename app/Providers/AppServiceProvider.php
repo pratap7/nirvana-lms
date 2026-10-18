@@ -7,13 +7,22 @@ use App\Domain\Billing\Gateways\StripePaymentGateway;
 use App\Domain\Catalog\Services\Video\BunnyStreamVideoProvider;
 use App\Domain\Catalog\Services\Video\NullVideoProvider;
 use App\Domain\Catalog\Services\Video\VideoProvider;
+use App\Domain\Communication\Commands\ApplyCommunicationRetentionCommand;
+use App\Domain\Communication\Commands\SendScheduledRemindersCommand;
+use App\Domain\Communication\Contracts\SmsProvider;
+use App\Domain\Communication\Contracts\WhatsAppProvider;
+use App\Domain\Communication\Listeners\SessionRescheduledNotificationListener;
+use App\Domain\Communication\Services\LogSmsProvider;
+use App\Domain\Communication\Services\LogWhatsAppProvider;
 use App\Domain\Identity\Models\User;
 use App\Domain\Identity\Services\PermissionResolver;
+use App\Domain\Scheduling\Events\SessionRescheduled;
 use App\Domain\Scheduling\Services\Meeting\GoogleMeetProvider;
 use App\Domain\Scheduling\Services\Meeting\MeetingProvider;
 use App\Domain\Scheduling\Services\Meeting\NullMeetingProvider;
 use App\Domain\Scheduling\Services\Meeting\ZoomMeetingProvider;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Spatie\Activitylog\Models\Activity;
@@ -46,6 +55,19 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(PaymentGateway::class, function () {
             return new StripePaymentGateway;
         });
+        $this->app->singleton(WhatsAppProvider::class, function () {
+            return new LogWhatsAppProvider;
+        });
+        $this->app->singleton(SmsProvider::class, function () {
+            return new LogSmsProvider;
+        });
+
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                SendScheduledRemindersCommand::class,
+                ApplyCommunicationRetentionCommand::class,
+            ]);
+        }
     }
 
     /**
@@ -56,6 +78,12 @@ class AppServiceProvider extends ServiceProvider
         Factory::guessFactoryNamesUsing(function (string $modelName): string {
             return 'Database\\Factories\\'.class_basename($modelName).'Factory';
         });
+
+        // Event-driven domain notifications (Section H)
+        Event::listen(
+            SessionRescheduled::class,
+            SessionRescheduledNotificationListener::class
+        );
 
         // Wire scoped PermissionResolver into Laravel's authorization Gate
         Gate::before(function ($user, string $ability, array $arguments = []): ?bool {

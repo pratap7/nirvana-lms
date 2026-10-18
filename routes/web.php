@@ -14,6 +14,8 @@ use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\Student\StudentLearningController;
 use App\Livewire\Certification\CertificateVerification;
 use App\Livewire\Certification\StudentCompletionChecklist;
+use App\Livewire\Communication\NotificationOutboxDashboard;
+use App\Livewire\Communication\TemplateManager;
 use App\Livewire\Events\EventAttendanceReport;
 use App\Livewire\Events\EventShow;
 use App\Livewire\Events\StaffEventCheckIn;
@@ -101,6 +103,8 @@ Route::middleware('auth')->prefix('teacher')->name('teacher.')->group(function (
 // Academic Moderator Console Routes
 Route::middleware('auth')->prefix('moderator')->name('moderator.')->group(function (): void {
     Route::get('/console', ModeratorConsole::class)->name('console');
+    Route::get('/communication/outbox', NotificationOutboxDashboard::class)->name('communication.outbox');
+    Route::get('/communication/templates', TemplateManager::class)->name('communication.templates');
 });
 
 // Events Module Routes (Section C)

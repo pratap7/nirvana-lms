@@ -40,6 +40,14 @@ class BatchMessage extends Model
         'recipient_id',
         'message',
         'read_at',
+        'flagged_at',
+        'flagged_by',
+        'flag_reason',
+        'is_reviewed_by_admin',
+        'admin_review_notes',
+        'admin_reviewed_by',
+        'admin_reviewed_at',
+        'archived_at',
     ];
 
     protected $hidden = ['id'];
@@ -51,6 +59,10 @@ class BatchMessage extends Model
     {
         return [
             'read_at' => 'datetime',
+            'flagged_at' => 'datetime',
+            'is_reviewed_by_admin' => 'boolean',
+            'admin_reviewed_at' => 'datetime',
+            'archived_at' => 'datetime',
         ];
     }
 
@@ -76,5 +88,50 @@ class BatchMessage extends Model
     public function recipient(): BelongsTo
     {
         return $this->belongsTo(User::class, 'recipient_id');
+    }
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function flaggedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'flagged_by');
+    }
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function adminReviewedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'admin_reviewed_by');
+    }
+
+    public function flag(User $flagger, string $reason): void
+    {
+        $this->update([
+            'flagged_at' => now(),
+            'flagged_by' => $flagger->id,
+            'flag_reason' => $reason,
+        ]);
+    }
+
+    public function review(User $admin, string $notes): void
+    {
+        $this->update([
+            'is_reviewed_by_admin' => true,
+            'admin_review_notes' => $notes,
+            'admin_reviewed_by' => $admin->id,
+            'admin_reviewed_at' => now(),
+        ]);
+    }
+
+    public function archive(): void
+    {
+        $this->update(['archived_at' => now()]);
+    }
+
+    public function isFlagged(): bool
+    {
+        return $this->flagged_at !== null;
     }
 }

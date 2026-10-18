@@ -9,8 +9,10 @@ use App\Domain\Catalog\Enums\CourseType;
 use App\Domain\Catalog\Enums\DeliveryMode;
 use App\Domain\Catalog\Enums\DifficultyLevel;
 use App\Domain\Catalog\ValueObjects\CompletionRule;
+use App\Domain\Enrollment\Models\Enrollment;
 use App\Domain\Identity\Models\Branch;
 use App\Domain\Identity\Models\User;
+use App\Domain\Scheduling\Models\Batch;
 use App\Support\Concerns\HasStateMachine;
 use App\Support\Concerns\HasUlid;
 use App\Support\Concerns\ScopedByBranch;
@@ -346,6 +348,22 @@ class Course extends Model implements HasMedia
             'prerequisite_course_id',
             'course_id',
         );
+    }
+
+    /**
+     * @return HasMany<Batch, $this>
+     */
+    public function batches(): HasMany
+    {
+        return $this->hasMany(Batch::class);
+    }
+
+    /**
+     * @return HasMany<Enrollment, $this>
+     */
+    public function enrollments(): HasMany
+    {
+        return $this->hasMany(Enrollment::class);
     }
 
     // ──────────────────────────────────────────────

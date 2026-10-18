@@ -13,6 +13,7 @@ use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property int $id
@@ -89,5 +90,34 @@ class Announcement extends Model
     public function author(): BelongsTo
     {
         return $this->belongsTo(User::class, 'author_id');
+    }
+
+    /**
+     * @return HasMany<AnnouncementRead, $this>
+     */
+    public function reads(): HasMany
+    {
+        return $this->hasMany(AnnouncementRead::class, 'announcement_id');
+    }
+
+    public function markAsRead(User $user): AnnouncementRead
+    {
+        /** @var AnnouncementRead $read */
+        $read = $this->reads()->firstOrCreate(
+            ['user_id' => $user->id],
+            ['read_at' => now()]
+        );
+
+        return $read;
+    }
+
+    public function isReadBy(User $user): bool
+    {
+        return $this->reads()->where('user_id', $user->id)->exists();
+    }
+
+    public function getReadReceiptsCountAttribute(): int
+    {
+        return $this->reads()->count();
     }
 }
